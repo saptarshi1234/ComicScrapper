@@ -4,7 +4,10 @@ import os,shutil
 from os import path
 import urllib.request
 print('start')
-def get_all(URL,yr,month):
+def get_all(URL,yr,month):	
+	'''	
+	download all comics of that particular year and month from given URL
+	'''
 	print(URL)
 	if not path.exists(yr):
 		os.mkdir(yr)
@@ -17,33 +20,36 @@ def get_all(URL,yr,month):
 	soup = BeautifulSoup(r.content, 'html5lib') 
 	print('sent')
 	table = soup.find('div', attrs = {'class':'small-7 medium-8 large-8 columns'})
-	#print(table.findAll('div', attrs = {'class':'row collapse'})) 
 	for row in table.findAll('div', attrs = {'class':'row collapse'}):
 		link=row.a['href']
 		date,author=row.find('div',attrs = {'id':'comic-author'}).text.split('\n')[1:3]
 		temp_r=requests.get("http://explosm.net"+link)
 		temp_soup=BeautifulSoup(temp_r.content, 'html5lib') 
 		img = temp_soup.find('img', attrs = {'id':'main-comic'})['src']
-		print(img[2:])
 		urllib.request.urlretrieve('http:'+img,date+'-'+author.split()[1]+'.png')
 	os.chdir('../..')
 	print('done')
 
 
 def get_random(URL):
+	'''
+	download a comic from /rcg page
+	'''
 	if not path.exists('random'):
 		os.mkdir('random')
 	os.chdir('random')
 	r=requests.get(URL)
 	soup = BeautifulSoup(r.content, 'html5lib') 
-	
 	list=soup.find('div', attrs = {'class':'rcg-panels'}).findAll('img')
 	i=1
 	for img in list:
-		urllib.request.urlretrieve(img['src'],'frame'+str(i)+'.png')
+		urllib.request.urlretrieve(img['src'],'frame'+str(i)+'.png')		#download image 
 		i+=1
 	
 def get_latest(URL,N):
+	'''
+	download latest N comics
+	'''
 	count=0
 	if not path.exists('latest'):
 		os.mkdir('latest')
@@ -66,7 +72,7 @@ def get_latest(URL,N):
 				urllib.request.urlretrieve('http:'+img,date+'-'+author.split()[1]+'.png')
 				count+=1
 				if count==N:
-					return
+					return										#return if N comics have been downloaded
 
 
 			
@@ -88,7 +94,7 @@ else:
 	months=['january','february','march','april','may','june','july','august','september','october','november','december']
 	for yr in range(int(start_yr),int(end_yr)+1):
 		if path.exists(yr):
-			shutil.rmtree(yr)
+			shutil.rmtree(yr)										#delete existing files
 		start=0
 		end=12
 		if yr==int(start_yr):
